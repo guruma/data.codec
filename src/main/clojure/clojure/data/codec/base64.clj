@@ -56,6 +56,14 @@
         1)
       0)))
 
+
+(defn- sbyte [n]
+  "Change int into signed byte."
+  (byte (if (< n 128)
+          n
+          (- n 256))))
+
+
 (defn decode!
   "Reads from the input byte array for the specified length starting at the offset
    index, and base64 decodes into the output array starting at index 0. Returns the
@@ -94,9 +102,9 @@
               x (bit-or x1 x2)
               y (bit-or y1 y2)
               z (bit-or z1 z2)]
-          (aset output j (byte x))
-          (aset output (inc j) (byte y))
-          (aset output (+ 2 j) (byte z)))
+          (aset output j (sbyte x))
+          (aset output (inc j) (sbyte y))
+          (aset output (+ 2 j) (sbyte z)))
         (recur (+ 4 i) (+ 3 j))))
     ; handle padded section
     (case tail-len
@@ -112,7 +120,7 @@
                    (bit-shift-right 4)
                    (bit-and 0x3))
               x (bit-or x1 x2)]
-          (aset output j (byte x)))
+          (aset output j (sbyte x)))
       2 (let [i (- in-end 3)
               j (dec out-end)
               a (long (aget dec-bytes (aget input i)))
@@ -132,8 +140,8 @@
                    (bit-and 0xF))
               x (bit-or x1 x2)
               y (bit-or y1 y2)]
-          (aset output j (byte x))
-          (aset output (inc j) (byte y))))
+          (aset output j (sbyte x))
+          (aset output (inc j) (sbyte y))))
     out-len))
 
 (defn decode
@@ -292,4 +300,3 @@
           (let [out-size (encode! in-buf 0 in-size out-buf)]
             (.write output-stream out-buf 0 out-size)
             (recur)))))))
-
